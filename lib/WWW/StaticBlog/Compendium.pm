@@ -10,6 +10,8 @@ class WWW::StaticBlog::Compendium
     );
 
     use DateTime;
+    use File::Find;
+
     use WWW::StaticBlog::Author;
     use WWW::StaticBlog::Post;
 
@@ -17,7 +19,10 @@ class WWW::StaticBlog::Compendium
         is      => 'rw',
         traits  => ['Array'],
         isa     => 'ArrayRef[WWW::StaticBlog::Post]|Undef',
+        lazy    => 1,
+        builder => '_build_posts',
         handles => {
+            all_posts     => 'elements',
             add_post      => 'push',
             num_posts     => 'count',
             _sorted_posts => 'sort',
@@ -30,12 +35,29 @@ class WWW::StaticBlog::Compendium
         is      => 'rw',
         traits  => ['Array'],
         isa     => 'ArrayRef[WWW::StaticBlog::Author]|Undef',
+        lazy    => 1,
+        builder => '_build_authors',
         handles => {
+            all_authors    => 'elements',
             add_authors    => 'push',
             num_authors    => 'count',
             clear_authors  => 'clear',
             filter_authors => 'grep',
         },
+    );
+
+    has posts_dir => (
+        is        => 'rw',
+        isa       => 'Str',
+        predicate => 'have_posts_dir',
+        clearer   => 'forget_posts_dir',
+    );
+
+    has authors_dir => (
+        is        => 'rw',
+        isa       => 'Str',
+        predicate => 'have_authors_dir',
+        clearer   => 'forget_authors_dir',
     );
 
     method sorted_posts()
@@ -68,6 +90,56 @@ class WWW::StaticBlog::Compendium
         return $self->filter_posts(
             sub { $_->author() =~ $author }
         );
+    }
+
+    method _build_posts()
+    {
+        return [] unless $self->have_posts_dir();
+
+        my @posts;
+        foreach my $post_file ($self->_find_files_for_dir($self->posts_dir())) {
+            push @posts, WWW::StaticBlog::Post->new(filename => $post_file);
+        }
+
+        return \@posts;
+    }
+
+    method _build_authors()
+    {
+        return [] unless $self->have_authors_dir();
+
+        my @authors;
+        foreach my $author_file ($self->_find_files_for_dir($self->authors_dir())) {
+            push @authors, WWW::StaticBlog::Author->new(filename => $author_file);
+        }
+
+        return \@authors;
+    }
+
+    method _find_files_for_dir($dir)
+    {
+        my @files;
+        find(
+            sub {
+                push @files, $File::Find::name
+                    if -T $File::Find::name
+            },
+            $dir,
+        );
+
+        return @files;
+    }
+
+    method reload_posts()
+    {
+        $self->clear_posts();
+        $self->posts($self->_build_posts());
+    }
+
+    method reload_authors()
+    {
+        $self->clear_authors();
+        $self->authors($self->_build_authors());
     }
 }
 

@@ -5,7 +5,10 @@ class Test::WWW::StaticBlog::Compendium
     use Test::Sweet;
 
     use Data::Faker;
+    use Directory::Scratch;
+    use File::Spec;
     use Text::Lorem;
+
     use WWW::StaticBlog::Author;
     use WWW::StaticBlog::Compendium;
     use WWW::StaticBlog::Post;
@@ -55,7 +58,7 @@ class Test::WWW::StaticBlog::Compendium
             uniq(map { $_->author() } @posts);
 
         my $compendium = WWW::StaticBlog::Compendium->new(
-            posts   => [ @posts ],
+            posts   => [ @posts   ],
             authors => [ @authors ],
         );
 
@@ -77,7 +80,7 @@ class Test::WWW::StaticBlog::Compendium
             for (1..3);
 
         my $compendium = WWW::StaticBlog::Compendium->new(
-            posts   => [ @posts ],
+            posts   => [ @posts   ],
             authors => [ @authors ],
         );
 
@@ -99,12 +102,78 @@ class Test::WWW::StaticBlog::Compendium
         );
     }
 
-    method _write_file_contents($contents)
+    test load_posts_from_dir
     {
-        my ($post_fh, $post_filename) = tempfile();
-        $post_fh->autoflush(1);
-        print $post_fh outdent_quote($contents);
+        my $tmpdir = Directory::Scratch->new();
 
-        return($post_filename, $post_fh);
+        my $compendium = WWW::StaticBlog::Compendium->new(
+            posts_dir => "$tmpdir",
+        );
+        $tmpdir->touch('post1', split("\n", outdent_quote(q|
+            Author: jhelwig
+            Title: foo
+            Post-Date: 2010-03-25 21:19:40
+
+            Here's the post contents.
+        |)));
+        $tmpdir->touch('post2', split("\n", outdent_quote(q|
+            Author: jhelwig
+            Title: bar
+            Post-Date: 2010-03-25 21:20:00
+
+            Here's the second post's contents.
+        |)));
+        $tmpdir->touch('post3', split("\n", outdent_quote(q|
+            Author: Jacob Helwig
+            Title: baz
+            Post-Date: 2010-03-25 21:30:00
+
+            Here's the third post's contents.
+        |)));
+
+        is(
+            $compendium->num_posts(),
+            3,
+            'Loads 3 posts from files',
+        );
+
+        is_deeply(
+            [ map { $_->body() } $compendium->sorted_posts() ],
+            [
+                "Here's the post contents.\n",
+                "Here's the second post's contents.\n",
+                "Here's the third post's contents.\n",
+            ],
+        );
+
+        $tmpdir->mkdir('more_posts');
+        $tmpdir->touch(
+            File::Spec->catdir('more_posts', 'post3'),
+            split("\n", outdent_quote(q|
+                Author: Jacob Helwig
+                Title: qux
+                Post-Date: 2010-03-25 22:00:30
+
+                Here's the fourth post's contents.
+            |))
+        );
+
+        ok($compendium->reload_posts());
+
+        is(
+            $compendium->num_posts(),
+            4,
+            'Loads 4 posts from files',
+        );
+
+        is_deeply(
+            [ map { $_->body() } $compendium->sorted_posts() ],
+            [
+                "Here's the post contents.\n",
+                "Here's the second post's contents.\n",
+                "Here's the third post's contents.\n",
+                "Here's the fourth post's contents.\n",
+            ],
+        )
     }
 }
