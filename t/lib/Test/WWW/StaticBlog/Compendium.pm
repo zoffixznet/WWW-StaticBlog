@@ -14,7 +14,6 @@ class Test::WWW::StaticBlog::Compendium
     use WWW::StaticBlog::Post;
 
     use List::MoreUtils qw( uniq          );
-    use Test::TempDir   qw( tempfile      );
     use Text::Outdent   qw( outdent_quote );
 
     sub _generate_post
