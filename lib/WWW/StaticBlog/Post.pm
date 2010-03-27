@@ -172,6 +172,25 @@ class WWW::StaticBlog::Post
     {
         $self->_parser()->css_files();
     }
+
+    method equals($other)
+    {
+        return 0 unless ref $other eq 'WWW::StaticBlog::Post';
+
+        return $self->_equals($self->title(),                  $other->title())
+            && $self->_equals(join(' ', $self->sorted_tags()), join(' ', $other->sorted_tags()))
+            && $self->_equals($self->body(),                   $other->body())
+            && $self->_equals($self->posted_on(),              $other->posted_on())
+            && $self->_equals($self->author(),                 $other->author())
+            && $self->_equals($self->filename(),               $other->filename())
+    }
+
+    method _equals($a, $b)
+    {
+        $a //= '';
+        $b //= '';
+        return $a eq $b;
+    }
 }
 
 "I don't think there's a punch-line scheduled, is there?";
