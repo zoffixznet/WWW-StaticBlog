@@ -175,4 +175,83 @@ class Test::WWW::StaticBlog::Compendium
             ],
         )
     }
+
+    test load_authors_from_dir
+    {
+        my $tmpdir = Directory::Scratch->new();
+
+        my $compendium = WWW::StaticBlog::Compendium->new(
+            authors_dir => "$tmpdir",
+        );
+        $tmpdir->touch('author1.yaml', split("\n", outdent_quote(q|
+            ---
+            name: Jacob Helwig
+            alias: jhelwig
+            email: jhelwig@cpan.org
+        |)));
+        $tmpdir->touch('author2.yaml', split("\n", outdent_quote(q|
+            ---
+            name: Tom Servo
+            alias: tservo
+            email: tservo@satelliteoflove.com
+        |)));
+        $tmpdir->touch('author3.yaml', split("\n", outdent_quote(q|
+            ---
+            name: Crow T. Robot
+            alias: crobot
+            email: crobot@satelliteoflove.com
+        |)));
+
+        is(
+            $compendium->num_authors(),
+            3,
+            'Loads 3 authors from files',
+        );
+
+        is_deeply(
+            [
+                map { $_->name() } $compendium->sorted_authors(
+                    sub { $_[0]->name() cmp $_[1]->name() }
+                )
+            ],
+            [
+                "Crow T. Robot",
+                "Jacob Helwig",
+                "Tom Servo",
+            ],
+        );
+
+        $tmpdir->mkdir('more_authors');
+        $tmpdir->touch(
+            File::Spec->catdir('more_authors', 'author3.yaml'),
+            split("\n", outdent_quote(q|
+                ---
+                name: Gypsy
+                alias: gypsy
+                email: gypsy@satelliteoflove.com
+            |))
+        );
+
+        ok($compendium->reload_authors());
+
+        is(
+            $compendium->num_authors(),
+            4,
+            'Loads 4 authors from files',
+        );
+
+        is_deeply(
+            [
+                map { $_->name() } $compendium->sorted_authors(
+                    sub { $_[0]->name() cmp $_[1]->name() }
+                )
+            ],
+            [
+                "Crow T. Robot",
+                "Gypsy",
+                "Jacob Helwig",
+                "Tom Servo",
+            ],
+        )
+    }
 }

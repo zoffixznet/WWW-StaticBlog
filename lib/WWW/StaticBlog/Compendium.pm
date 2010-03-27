@@ -22,12 +22,12 @@ class WWW::StaticBlog::Compendium
         lazy    => 1,
         builder => '_build_posts',
         handles => {
-            all_posts     => 'elements',
             add_post      => 'push',
-            num_posts     => 'count',
-            _sorted_posts => 'sort',
+            all_posts     => 'elements',
             clear_posts   => 'clear',
             filter_posts  => 'grep',
+            num_posts     => 'count',
+            _sorted_posts => 'sort',
         },
     );
 
@@ -38,11 +38,12 @@ class WWW::StaticBlog::Compendium
         lazy    => 1,
         builder => '_build_authors',
         handles => {
-            all_authors    => 'elements',
             add_authors    => 'push',
-            num_authors    => 'count',
+            all_authors    => 'elements',
             clear_authors  => 'clear',
             filter_authors => 'grep',
+            num_authors    => 'count',
+            sorted_authors => 'sort',
         },
     );
 
