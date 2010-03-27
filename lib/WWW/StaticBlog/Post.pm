@@ -16,6 +16,8 @@ class WWW::StaticBlog::Post
     use aliased 'DateTime' => 'DT';
 
     use Email::Simple;
+    use Text::Multi;
+
     use File::Slurp qw( read_file );
 
     has title => (
