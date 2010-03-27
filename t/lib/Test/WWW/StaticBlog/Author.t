@@ -1,8 +1,7 @@
-use MooseX::Declare;
+use Test::Mini::Unit;
 
-class Test::WWW::StaticBlog::Author
+testcase Test::WWW::StaticBlog::Author
 {
-    use Test::Sweet;
     use WWW::StaticBlog::Author;
 
     use Test::TempDir qw( tempfile      );
@@ -16,15 +15,15 @@ class Test::WWW::StaticBlog::Author
             alias => 'jhelwig',
         );
 
-        is(
+        assert_eq(
             $author->name(),
             'Jacob Helwig',
         );
-        is(
+        assert_eq(
             $author->email(),
             'jhelwig@cpan.org',
         );
-        is(
+        assert_eq(
             $author->alias(),
             'jhelwig',
         );
@@ -37,15 +36,15 @@ class Test::WWW::StaticBlog::Author
             email => 'jhelwig@cpan.org',
         );
 
-        is(
+        assert_eq(
             $author->name(),
             'Jacob Helwig',
         );
-        is(
+        assert_eq(
             $author->email(),
             'jhelwig@cpan.org',
         );
-        is(
+        assert_eq(
             $author->alias(),
             undef,
         );
@@ -58,15 +57,15 @@ class Test::WWW::StaticBlog::Author
             alias => 'jhelwig',
         );
 
-        is(
+        assert_eq(
             $author->name(),
             'Jacob Helwig',
         );
-        is(
+        assert_eq(
             $author->email(),
             undef,
         );
-        is(
+        assert_eq(
             $author->alias(),
             'jhelwig'
         );
@@ -79,15 +78,15 @@ class Test::WWW::StaticBlog::Author
             alias => 'jhelwig',
         );
 
-        is(
+        assert_eq(
             $author->name(),
             undef,
         );
-        is(
+        assert_eq(
             $author->email(),
             'jhelwig@cpan.org',
         );
-        is(
+        assert_eq(
             $author->alias(),
             'jhelwig',
         );
@@ -106,15 +105,15 @@ class Test::WWW::StaticBlog::Author
             filename => $filename,
         );
 
-        is(
+        assert_eq(
             $author->name(),
             'Jacob Helwig',
         );
-        is(
+        assert_eq(
             $author->email(),
             'jhelwig@cpan.org',
         );
-        is(
+        assert_eq(
             $author->alias(),
             'jhelwig',
         );
@@ -132,15 +131,15 @@ class Test::WWW::StaticBlog::Author
             filename => $filename,
         );
 
-        is(
+        assert_eq(
             $author->name(),
             'Jacob Helwig',
         );
-        is(
+        assert_eq(
             $author->email(),
             'jhelwig@cpan.org',
         );
-        is(
+        assert_eq(
             $author->alias(),
             undef,
         );
@@ -158,15 +157,15 @@ class Test::WWW::StaticBlog::Author
             filename => $filename,
         );
 
-        is(
+        assert_eq(
             $author->name(),
             'Jacob Helwig',
         );
-        is(
+        assert_eq(
             $author->email(),
             undef,
         );
-        is(
+        assert_eq(
             $author->alias(),
             'jhelwig',
         );
@@ -184,15 +183,15 @@ class Test::WWW::StaticBlog::Author
             filename => $filename,
         );
 
-        is(
+        assert_eq(
             $author->name(),
             undef,
         );
-        is(
+        assert_eq(
             $author->email(),
             'jhelwig@cpan.org',
         );
-        is(
+        assert_eq(
             $author->alias(),
             'jhelwig',
         );

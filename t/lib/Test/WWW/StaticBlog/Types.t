@@ -39,7 +39,7 @@ class Test::WWW::StaticBlog::Types
             tag => 'there should be several tags',
         );
 
-        is_deeply(
+        assert_eq(
             [ $types->sorted_tags() ],
             [qw(
                 be
@@ -57,7 +57,7 @@ class Test::WWW::StaticBlog::Types
             tag => 'there should be "several tags"',
         );
 
-        is_deeply(
+        assert_eq(
             [ $types->sorted_tags() ],
             [
                 'be',
@@ -74,12 +74,12 @@ class Test::WWW::StaticBlog::Types
             datetime => '2010-03-22 19:01:10',
         );
 
-        isa_ok(
+        assert_isa(
             $types->datetime(),
             'DateTime',
         );
 
-        is(
+        assert_eq(
             $types->datetime()->iso8601(),
             '2010-03-22T19:01:10',
         );
