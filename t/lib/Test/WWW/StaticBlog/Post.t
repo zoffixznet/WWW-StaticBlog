@@ -1,8 +1,7 @@
-use MooseX::Declare;
+use Test::Mini::Unit;
 
-class Test::WWW::StaticBlog::Post
+testcase Test::WWW::StaticBlog::Post
 {
-    use Test::Sweet;
     use WWW::StaticBlog::Post;
 
     use Test::TempDir qw( tempfile      );
@@ -35,17 +34,17 @@ class Test::WWW::StaticBlog::Post
             |),
         );
 
-        is(
+        assert_eq(
             $post->author(),
             'jhelwig',
             'author',
         );
-        is(
+        assert_eq(
             $post->posted_on()->iso8601(),
             '2010-03-22T22:05:10',
             'posted_on',
         );
-        is_deeply(
+        assert_eq(
             $post->tags(),
             [
                 'First',
@@ -54,12 +53,12 @@ class Test::WWW::StaticBlog::Post
             ],
             'tags',
         );
-        is(
+        assert_eq(
             $post->title(),
             'The very first post!',
             'title',
         );
-        is(
+        assert_eq(
             $post->body(),
             outdent_quote(q|
                 {{{ Markdown }}}
@@ -81,7 +80,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'body',
         );
-        is(
+        assert_eq(
             $post->rendered_body(),
             outdent_quote(q|
                 <div class="text-multi text-multi-markdown">
@@ -109,7 +108,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'rendered_body',
         );
-        is(
+        assert_eq(
             $post->rendered_body(1),
             outdent_quote(q|
                 <!-- A paragraph.
@@ -151,7 +150,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'detailed rendered_body',
         );
-        is(
+        assert_eq(
             $post->inline_css(),
             outdent_quote(q|
                 .text-multi-code {
@@ -192,7 +191,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'inline_css',
         );
-        like(
+        assert_match(
             join(':', $post->files_for_css()),
             qr|Text/Multi/Block/Code\.css$|,
             'files_for_css',
@@ -228,17 +227,17 @@ class Test::WWW::StaticBlog::Post
             filename => $file,
         );
 
-        is(
+        assert_eq(
             $post->author(),
             'jhelwig',
             'author',
         );
-        is(
+        assert_eq(
             $post->posted_on()->iso8601(),
             '2010-03-22T22:05:10',
             'posted_on',
         );
-        is_deeply(
+        assert_eq(
             $post->tags(),
             [
                 'First',
@@ -247,12 +246,12 @@ class Test::WWW::StaticBlog::Post
             ],
             'tags',
         );
-        is(
+        assert_eq(
             $post->title(),
             'The very first post!',
             'title',
         );
-        is(
+        assert_eq(
             $post->body(),
             outdent_quote(q|
                 {{{ Markdown }}}
@@ -274,7 +273,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'body',
         );
-        is(
+        assert_eq(
             $post->rendered_body(),
             outdent_quote(q|
                 <div class="text-multi text-multi-markdown">
@@ -302,7 +301,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'rendered_body',
         );
-        is(
+        assert_eq(
             $post->rendered_body(1),
             outdent_quote(q|
                 <!-- A paragraph.
@@ -344,7 +343,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'detailed rendered_body',
         );
-        is(
+        assert_eq(
             $post->inline_css(),
             outdent_quote(q|
                 .text-multi-code {
@@ -385,7 +384,7 @@ class Test::WWW::StaticBlog::Post
             |),
             'inline_css',
         );
-        like(
+        assert_match(
             join(':', $post->files_for_css()),
             qr|Text/Multi/Block/Code\.css$|,
             'files_for_css',

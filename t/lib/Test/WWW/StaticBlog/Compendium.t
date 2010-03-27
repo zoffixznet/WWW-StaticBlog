@@ -1,9 +1,7 @@
-use MooseX::Declare;
+use Test::Mini::Unit;
 
-class Test::WWW::StaticBlog::Compendium
+testcase Test::WWW::StaticBlog::Compendium
 {
-    use Test::Sweet;
-
     use Data::Faker;
     use Directory::Scratch;
     use File::Spec;
@@ -61,7 +59,7 @@ class Test::WWW::StaticBlog::Compendium
             authors => [ @authors ],
         );
 
-        is_deeply(
+        assert_eq(
             [ $compendium->sorted_posts() ],
             [ sort { DateTime->compare($a->posted_on(), $b->posted_on()) } @posts ],
             'sorted_posts sorts by posted_on',
@@ -83,13 +81,13 @@ class Test::WWW::StaticBlog::Compendium
             authors => [ @authors ],
         );
 
-        is_deeply(
+        assert_eq(
             [ $compendium->posts_for_author($authors[0]->alias())  ],
             [ grep { $_->author() eq $authors[0]->alias() } @posts ],
             'posts_for_author finds posts with the same author string',
         );
 
-        is_deeply(
+        assert_eq(
             [ $compendium->posts_for_author($authors[0]) ],
             [
                 grep {
@@ -130,13 +128,13 @@ class Test::WWW::StaticBlog::Compendium
             Here's the third post's contents.
         |)));
 
-        is(
+        assert_eq(
             $compendium->num_posts(),
             3,
             'Loads 3 posts from files',
         );
 
-        is_deeply(
+        assert_eq(
             [ map { $_->body() } $compendium->sorted_posts() ],
             [
                 "Here's the post contents.\n",
@@ -157,15 +155,15 @@ class Test::WWW::StaticBlog::Compendium
             |))
         );
 
-        ok($compendium->reload_posts());
+        assert($compendium->reload_posts());
 
-        is(
+        assert_eq(
             $compendium->num_posts(),
             4,
             'Loads 4 posts from files',
         );
 
-        is_deeply(
+        assert_eq(
             [ map { $_->body() } $compendium->sorted_posts() ],
             [
                 "Here's the post contents.\n",
@@ -202,13 +200,13 @@ class Test::WWW::StaticBlog::Compendium
             email: crobot@satelliteoflove.com
         |)));
 
-        is(
+        assert_eq(
             $compendium->num_authors(),
             3,
             'Loads 3 authors from files',
         );
 
-        is_deeply(
+        assert_eq(
             [
                 map { $_->name() } $compendium->sorted_authors(
                     sub { $_[0]->name() cmp $_[1]->name() }
@@ -232,15 +230,15 @@ class Test::WWW::StaticBlog::Compendium
             |))
         );
 
-        ok($compendium->reload_authors());
+        assert($compendium->reload_authors());
 
-        is(
+        assert_eq(
             $compendium->num_authors(),
             4,
             'Loads 4 authors from files',
         );
 
-        is_deeply(
+        assert_eq(
             [
                 map { $_->name() } $compendium->sorted_authors(
                     sub { $_[0]->name() cmp $_[1]->name() }
