@@ -14,7 +14,7 @@ testcase Test::WWW::StaticBlog::Post
             posted_on => '2010-03-22 22:05:10',
             tags      => 'First post! "Aw, jeah."',
             title     => 'The very first post!',
-            body      => outdent_quote(q|
+            raw_body  => outdent_quote(q|
                 {{{ Markdown }}}
                 A paragraph.
 
@@ -59,7 +59,7 @@ testcase Test::WWW::StaticBlog::Post
             'title',
         );
         assert_eq(
-            $post->body(),
+            $post->raw_body(),
             outdent_quote(q|
                 {{{ Markdown }}}
                 A paragraph.
@@ -78,10 +78,10 @@ testcase Test::WWW::StaticBlog::Post
 
                 map { $_->thing() } @stuff;
             |),
-            'body',
+            'raw_body',
         );
         assert_eq(
-            $post->rendered_body(),
+            $post->body(),
             outdent_quote(q|
                 <div class="text-multi text-multi-markdown">
                 <p>A paragraph.</p>
@@ -106,10 +106,10 @@ testcase Test::WWW::StaticBlog::Post
                 </span><span class="Function">map</span><span class="Normal">&nbsp;{&nbsp;</span><span class="Variable">$_</span><span class="Normal">-&gt;thing()&nbsp;}&nbsp;</span><span class="DataType">@stuff</span><span class="Normal">;</span>
                 </pre>
             |),
-            'rendered_body',
+            'body',
         );
         assert_eq(
-            $post->rendered_body(1),
+            $post->body(1),
             outdent_quote(q|
                 <!-- A paragraph.
 
@@ -148,7 +148,7 @@ testcase Test::WWW::StaticBlog::Post
                 </span><span class="Function">map</span><span class="Normal">&nbsp;{&nbsp;</span><span class="Variable">$_</span><span class="Normal">-&gt;thing()&nbsp;}&nbsp;</span><span class="DataType">@stuff</span><span class="Normal">;</span>
                 </pre>
             |),
-            'detailed rendered_body',
+            'detailed body',
         );
         assert_eq(
             $post->inline_css(),
@@ -252,7 +252,7 @@ testcase Test::WWW::StaticBlog::Post
             'title',
         );
         assert_eq(
-            $post->body(),
+            $post->raw_body(),
             outdent_quote(q|
                 {{{ Markdown }}}
                 A paragraph.
@@ -271,10 +271,10 @@ testcase Test::WWW::StaticBlog::Post
 
                 map { $_->thing() } @stuff;
             |),
-            'body',
+            'raw_body',
         );
         assert_eq(
-            $post->rendered_body(),
+            $post->body(),
             outdent_quote(q|
                 <div class="text-multi text-multi-markdown">
                 <p>A paragraph.</p>
@@ -299,10 +299,10 @@ testcase Test::WWW::StaticBlog::Post
                 </span><span class="Function">map</span><span class="Normal">&nbsp;{&nbsp;</span><span class="Variable">$_</span><span class="Normal">-&gt;thing()&nbsp;}&nbsp;</span><span class="DataType">@stuff</span><span class="Normal">;</span>
                 </pre>
             |),
-            'rendered_body',
+            'body',
         );
         assert_eq(
-            $post->rendered_body(1),
+            $post->body(1),
             outdent_quote(q|
                 <!-- A paragraph.
 
@@ -341,7 +341,7 @@ testcase Test::WWW::StaticBlog::Post
                 </span><span class="Function">map</span><span class="Normal">&nbsp;{&nbsp;</span><span class="Variable">$_</span><span class="Normal">-&gt;thing()&nbsp;}&nbsp;</span><span class="DataType">@stuff</span><span class="Normal">;</span>
                 </pre>
             |),
-            'detailed rendered_body',
+            'detailed body',
         );
         assert_eq(
             $post->inline_css(),

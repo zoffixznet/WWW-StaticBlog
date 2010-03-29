@@ -3,6 +3,7 @@ use Test::Mini::Unit;
 testcase Test::WWW::StaticBlog::Compendium
 {
     use Data::Faker;
+    use Data::Faker::DateTime;
     use Directory::Scratch;
     use File::Spec;
     use Text::Lorem;
@@ -24,11 +25,11 @@ testcase Test::WWW::StaticBlog::Compendium
 
         return WWW::StaticBlog::Post->new(
             author    => $options{author}    || $faker->name(),
-            posted_on => $options{posted_on} || $faker->date(),
+            posted_on => $options{posted_on} || Data::Faker::DateTime::timestr('%F %H:%M:%S'),
             tags      => $options{tags}      || $lorem->words(int(rand(3))),
             title     => $options{title}     || $lorem->sentences(1),
-            body      => outdent_quote(
-                $options{body} || $lorem->paragraphs(3)
+            raw_body  => outdent_quote(
+                $options{raw_body} || $lorem->paragraphs(3)
             ),
         );
     }
@@ -51,12 +52,8 @@ testcase Test::WWW::StaticBlog::Compendium
     {
         my @posts = map { $self->_generate_post() } (1..5);
 
-        my @authors = map { $self->_generate_author(name => $_) }
-            uniq(map { $_->author() } @posts);
-
         my $compendium = WWW::StaticBlog::Compendium->new(
             posts   => [ @posts   ],
-            authors => [ @authors ],
         );
 
         assert_eq(
@@ -70,29 +67,29 @@ testcase Test::WWW::StaticBlog::Compendium
     {
         my @posts = map { $self->_generate_post() } (1..5);
 
-        my @authors = map { $self->_generate_author(name => $_) }
-            uniq(map { $_->author() } @posts);
+        my $author = $self->_generate_author(
+            name => $posts[0]->author()
+        );
 
-        push @posts, $self->_generate_post(author => $authors[0]->alias())
+        push @posts, $self->_generate_post(author => $author->alias())
             for (1..3);
 
         my $compendium = WWW::StaticBlog::Compendium->new(
             posts   => [ @posts   ],
-            authors => [ @authors ],
         );
 
         assert_eq(
-            [ $compendium->posts_for_author($authors[0]->alias())  ],
-            [ grep { $_->author() eq $authors[0]->alias() } @posts ],
+            [ $compendium->posts_for_author($author->alias())  ],
+            [ grep { $_->author() eq $author->alias() } @posts ],
             'posts_for_author finds posts with the same author string',
         );
 
         assert_eq(
-            [ $compendium->posts_for_author($authors[0]) ],
+            [ $compendium->posts_for_author($author) ],
             [
                 grep {
-                    $_->author() eq $authors[0]->alias()
-                    || $_->author() eq $authors[0]->name()
+                    $_->author() eq $author->alias()
+                    || $_->author() eq $author->name()
                 } @posts
             ],
             'posts_for_author finds posts with the same author, or alias, when given an Author',
@@ -135,7 +132,7 @@ testcase Test::WWW::StaticBlog::Compendium
         );
 
         assert_eq(
-            [ map { $_->body() } $compendium->sorted_posts() ],
+            [ map { $_->raw_body() } $compendium->sorted_posts() ],
             [
                 "Here's the post contents.\n",
                 "Here's the second post's contents.\n",
@@ -164,91 +161,12 @@ testcase Test::WWW::StaticBlog::Compendium
         );
 
         assert_eq(
-            [ map { $_->body() } $compendium->sorted_posts() ],
+            [ map { $_->raw_body() } $compendium->sorted_posts() ],
             [
                 "Here's the post contents.\n",
                 "Here's the second post's contents.\n",
                 "Here's the third post's contents.\n",
                 "Here's the fourth post's contents.\n",
-            ],
-        )
-    }
-
-    test load_authors_from_dir
-    {
-        my $tmpdir = Directory::Scratch->new();
-
-        my $compendium = WWW::StaticBlog::Compendium->new(
-            authors_dir => "$tmpdir",
-        );
-        $tmpdir->touch('author1.yaml', split("\n", outdent_quote(q|
-            ---
-            name: Jacob Helwig
-            alias: jhelwig
-            email: jhelwig@cpan.org
-        |)));
-        $tmpdir->touch('author2.yaml', split("\n", outdent_quote(q|
-            ---
-            name: Tom Servo
-            alias: tservo
-            email: tservo@satelliteoflove.com
-        |)));
-        $tmpdir->touch('author3.yaml', split("\n", outdent_quote(q|
-            ---
-            name: Crow T. Robot
-            alias: crobot
-            email: crobot@satelliteoflove.com
-        |)));
-
-        assert_eq(
-            $compendium->num_authors(),
-            3,
-            'Loads 3 authors from files',
-        );
-
-        assert_eq(
-            [
-                map { $_->name() } $compendium->sorted_authors(
-                    sub { $_[0]->name() cmp $_[1]->name() }
-                )
-            ],
-            [
-                "Crow T. Robot",
-                "Jacob Helwig",
-                "Tom Servo",
-            ],
-        );
-
-        $tmpdir->mkdir('more_authors');
-        $tmpdir->touch(
-            File::Spec->catdir('more_authors', 'author3.yaml'),
-            split("\n", outdent_quote(q|
-                ---
-                name: Gypsy
-                alias: gypsy
-                email: gypsy@satelliteoflove.com
-            |))
-        );
-
-        assert($compendium->reload_authors());
-
-        assert_eq(
-            $compendium->num_authors(),
-            4,
-            'Loads 4 authors from files',
-        );
-
-        assert_eq(
-            [
-                map { $_->name() } $compendium->sorted_authors(
-                    sub { $_[0]->name() cmp $_[1]->name() }
-                )
-            ],
-            [
-                "Crow T. Robot",
-                "Gypsy",
-                "Jacob Helwig",
-                "Tom Servo",
             ],
         )
     }

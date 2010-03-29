@@ -3,6 +3,7 @@ use 5.010;
 use MooseX::Declare;
 
 class WWW::StaticBlog::Compendium
+    with WWW::StaticBlog::Role::FileLoader
 {
     use MooseX::Types::Moose qw(
         ArrayRef
@@ -10,9 +11,7 @@ class WWW::StaticBlog::Compendium
     );
 
     use DateTime;
-    use File::Find;
 
-    use WWW::StaticBlog::Author;
     use WWW::StaticBlog::Post;
 
     has posts => (
@@ -31,34 +30,11 @@ class WWW::StaticBlog::Compendium
         },
     );
 
-    has authors => (
-        is      => 'rw',
-        traits  => ['Array'],
-        isa     => 'ArrayRef[WWW::StaticBlog::Author]|Undef',
-        lazy    => 1,
-        builder => '_build_authors',
-        handles => {
-            add_authors    => 'push',
-            all_authors    => 'elements',
-            clear_authors  => 'clear',
-            filter_authors => 'grep',
-            num_authors    => 'count',
-            sorted_authors => 'sort',
-        },
-    );
-
     has posts_dir => (
         is        => 'rw',
         isa       => 'Str',
         predicate => 'have_posts_dir',
         clearer   => 'forget_posts_dir',
-    );
-
-    has authors_dir => (
-        is        => 'rw',
-        isa       => 'Str',
-        predicate => 'have_authors_dir',
-        clearer   => 'forget_authors_dir',
     );
 
     method sorted_posts()
@@ -105,42 +81,10 @@ class WWW::StaticBlog::Compendium
         return \@posts;
     }
 
-    method _build_authors()
-    {
-        return [] unless $self->have_authors_dir();
-
-        my @authors;
-        foreach my $author_file ($self->_find_files_for_dir($self->authors_dir())) {
-            push @authors, WWW::StaticBlog::Author->new(filename => $author_file);
-        }
-
-        return \@authors;
-    }
-
-    method _find_files_for_dir($dir)
-    {
-        my @files;
-        find(
-            sub {
-                push @files, $File::Find::name
-                    if -T $File::Find::name
-            },
-            $dir,
-        );
-
-        return @files;
-    }
-
     method reload_posts()
     {
         $self->clear_posts();
         $self->posts($self->_build_posts());
-    }
-
-    method reload_authors()
-    {
-        $self->clear_authors();
-        $self->authors($self->_build_authors());
     }
 }
 

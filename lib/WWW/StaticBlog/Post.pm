@@ -51,11 +51,11 @@ class WWW::StaticBlog::Post
         },
     );
 
-    has body => (
+    has raw_body => (
         is      => 'rw',
         isa     => Str,
         lazy    => 1,
-        trigger => \&_body_trigger,
+        trigger => \&_raw_body_trigger,
         default => sub {
             my $self = shift;
             return unless defined $self->_file_contents();
@@ -85,6 +85,12 @@ class WWW::StaticBlog::Post
             return unless defined $self->_file_contents();
             return $self->_file_contents_for('Author');
         }
+    );
+
+    has slug => (
+        is         => 'rw',
+        isa        => Str,
+        lazy_build => 1,
     );
 
     has _file_contents => (
@@ -117,7 +123,7 @@ class WWW::StaticBlog::Post
         clearer    => '_clear_parser',
     );
 
-    sub _body_trigger
+    sub _raw_body_trigger
     {
         my ($self, $body, $old_body) = @_;
 
@@ -149,12 +155,24 @@ class WWW::StaticBlog::Post
             default_type => $self->default_markup_lang(),
         );
 
-        $parser->process_text($self->body());
+        $parser->process_text($self->raw_body());
 
         return $parser;
     }
 
-    method rendered_body($debug = 0)
+    method _build_slug()
+    {
+        my $slug = $self->_file_contents_for('Slug');
+        $slug //= $self->title();
+        return unless defined $slug;
+
+        $slug =~ s|[:/?#[\]@!\$&'()*+,;=]||g;
+        $slug =~ s/ +/_/g;
+
+        return lc $slug;
+    }
+
+    method body($debug = 0)
     {
         $self->_parser()->detailed($debug);
         my $rendered_body = $self->_parser()->render();
@@ -172,25 +190,6 @@ class WWW::StaticBlog::Post
     {
         $self->_parser()->css_files();
     }
-
-    method equals($other)
-    {
-        return 0 unless ref $other eq 'WWW::StaticBlog::Post';
-
-        return $self->_equals($self->title(),                  $other->title())
-            && $self->_equals(join(' ', $self->sorted_tags()), join(' ', $other->sorted_tags()))
-            && $self->_equals($self->body(),                   $other->body())
-            && $self->_equals($self->posted_on(),              $other->posted_on())
-            && $self->_equals($self->author(),                 $other->author())
-            && $self->_equals($self->filename(),               $other->filename())
-    }
-
-    method _equals($a, $b)
-    {
-        $a //= '';
-        $b //= '';
-        return $a eq $b;
-    }
 }
 
 "I don't think there's a punch-line scheduled, is there?";
@@ -198,7 +197,6 @@ __END__
 =head1 NAME
 
 WWW::StaticBlog::Post - Generate a set of static pages for a blog.
-
 
 =head1 SYNOPSIS
 
@@ -208,7 +206,6 @@ WWW::StaticBlog::Post - Generate a set of static pages for a blog.
 
 Jacob Helwig, C<< <jhelwig at cpan.org> >>
 
-
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-www-staticblog at
@@ -216,7 +213,6 @@ rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WWW-StaticBlog>.  I will be
 notified, and then you'll automatically be notified of progress on your bug as
 I make changes.
-
 
 =head1 SUPPORT
 
@@ -230,24 +226,19 @@ You can also look for information at:
 
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-StaticBlog>
 
-
 =item * AnnoCPAN: Annotated CPAN documentation
 
 L<http://annocpan.org/dist/WWW-StaticBlog>
-
 
 =item * CPAN Ratings
 
 L<http://cpanratings.perl.org/d/WWW-StaticBlog>
 
-
 =item * Search CPAN
 
 L<http://search.cpan.org/dist/WWW-StaticBlog>
 
-
 =back
-
 
 =head1 COPYRIGHT & LICENSE
 

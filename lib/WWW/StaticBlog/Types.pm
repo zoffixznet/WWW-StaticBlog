@@ -27,7 +27,11 @@ class WWW::StaticBlog::Types
         via {
             my $parser = DateTime::Format::Natural->new();
             my $dt = $parser->parse_datetime($_);
-            return unless $parser->success();
+
+            unless ($parser->success()) {
+                warn $parser->error();
+                return;
+            }
 
             return $dt;
         };
