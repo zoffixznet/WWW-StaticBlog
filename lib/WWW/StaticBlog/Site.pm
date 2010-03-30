@@ -7,8 +7,9 @@ class WWW::StaticBlog::Site
     with MooseX::SimpleConfig
     with MooseX::Getopt
 {
-    use Cwd        qw( getcwd      );
-    use File::Path qw( remove_tree );
+    use Cwd                   qw( getcwd      );
+    use File::Copy::Recursive qw( rcopy       );
+    use File::Path            qw( remove_tree );
 
     use Time::SoFar qw(
         runinterval
@@ -69,6 +70,12 @@ class WWW::StaticBlog::Site
         is        => 'rw',
         isa       => 'Str',
         predicate => 'has_authors_dir',
+    );
+
+    has static_dir => (
+        is        => 'rw',
+        isa       => 'Str',
+        predicate => 'has_static_dir',
     );
 
     has output_dir => (
@@ -204,7 +211,7 @@ class WWW::StaticBlog::Site
     method render_index()
     {
         runinterval();
-        print "Rendering index: ";
+        print "Rendering index... ";
 
         my $x = $self->index_post_count() - 1;
         my @posts = reverse $self->compendium()->sorted_posts();
@@ -235,12 +242,25 @@ class WWW::StaticBlog::Site
         say "(" . runinterval() . ")";
     }
 
+    method copy_static_files()
+    {
+        return unless $self->has_static_dir();
+
+        runinterval();
+        print "Copying static files... ";
+        rcopy($self->static_dir(), $self->output_dir());
+        say "(" . runinterval() . ")";
+    }
+
     method run()
     {
-        say "Cleaning up " . $self->output_dir();
+        say "Cleaning up... " . $self->output_dir();
         remove_tree( $self->output_dir(), {keep_root => 1} );
+
         $self->render_posts();
         $self->render_index();
+        $self->copy_static_files();
+
         say "Total time: " . runtime();
     }
 }
