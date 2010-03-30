@@ -10,6 +10,11 @@ class WWW::StaticBlog::Site
     use Cwd        qw( getcwd      );
     use File::Path qw( remove_tree );
 
+    use Time::SoFar qw(
+        runinterval
+        runtime
+    );
+
     use WWW::StaticBlog::Author;
     use WWW::StaticBlog::Compendium;
 
@@ -156,6 +161,7 @@ class WWW::StaticBlog::Site
         say "Rendering posts:";
         foreach my $post ($self->compendium()->sorted_posts()) {
             $post->save();
+            runinterval();
             print "\t" . $post->title();
             my $out_file = File::Spec->catfile(
                 $self->output_dir(),
@@ -181,7 +187,7 @@ class WWW::StaticBlog::Site
                 },
                 $out_file,
             );
-            say " => $out_file";
+            say " => $out_file (" . runinterval() . ")";
         }
     }
 
@@ -190,5 +196,6 @@ class WWW::StaticBlog::Site
         say "Cleaning up " . $self->output_dir();
         remove_tree( $self->output_dir(), {keep_root => 1} );
         $self->render_posts();
+        say "Total time: " . runtime();
     }
 }
