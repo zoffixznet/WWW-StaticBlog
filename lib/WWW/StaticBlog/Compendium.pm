@@ -40,7 +40,12 @@ class WWW::StaticBlog::Compendium
     method sorted_posts()
     {
         return $self->_sorted_posts(
-            sub { DateTime->compare($_[0]->posted_on(), $_[1]->posted_on()) }
+            sub {
+                DateTime->compare(
+                    $_[0]->posted_on() || DateTime->now(),
+                    $_[1]->posted_on() || DateTime->now(),
+                )
+            }
         );
     }
 

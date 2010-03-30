@@ -76,7 +76,8 @@ class WWW::StaticBlog::Post
         default => sub {
             my $self = shift;
             return unless defined $self->_file_contents();
-            return $self->_file_contents_for('Post-Date');
+            return $self->_file_contents_for('Post-Date')
+                || DT->now();
         },
     );
 
