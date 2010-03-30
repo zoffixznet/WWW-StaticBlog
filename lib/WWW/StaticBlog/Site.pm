@@ -104,6 +104,18 @@ class WWW::StaticBlog::Site
         },
     );
 
+    has index_template => (
+        is       => 'rw',
+        isa      => 'Str',
+        required => 1,
+    );
+
+    has index_post_count => (
+        is      => 'rw',
+        isa     => 'Int',
+        default => 10,
+    );
+
     has post_template => (
         is       => 'rw',
         isa      => 'Str',
@@ -189,10 +201,44 @@ class WWW::StaticBlog::Site
         }
     }
 
+    method render_index()
+    {
+        runinterval();
+        print "Rendering index: ";
+
+        my $x = $self->index_post_count() - 1;
+        my @posts = grep { defined } ($self->compendium()->sorted_posts())[0..$x];
+
+        my @extra_head_sections;
+        foreach my $post (@posts) {
+            push @extra_head_sections, {
+                name     => 'style',
+                attr     => 'type="text/css"',
+                contents => $post->inline_css(),
+            } if $post->inline_css();
+        }
+
+        my $out_file = File::Spec->catfile(
+            $self->output_dir(),
+            'index.html',
+        );
+        $self->_template()->render_to_file(
+            $self->index_template(),
+            {
+                posts               => [ @posts               ],
+                extra_head_sections => [ @extra_head_sections ],
+            },
+            $out_file,
+        );
+
+        say "(" . runinterval() . ")";
+    }
+
     method run()
     {
         say "Cleaning up " . $self->output_dir();
         remove_tree( $self->output_dir(), {keep_root => 1} );
+        $self->render_index();
         $self->render_posts();
         say "Total time: " . runtime();
     }
