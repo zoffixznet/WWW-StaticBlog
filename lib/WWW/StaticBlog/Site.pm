@@ -207,7 +207,8 @@ class WWW::StaticBlog::Site
         print "Rendering index: ";
 
         my $x = $self->index_post_count() - 1;
-        my @posts = grep { defined } ($self->compendium()->sorted_posts())[0..$x];
+        my @posts = reverse $self->compendium()->sorted_posts();
+        @posts = grep { defined } @posts[0..$x];
 
         my @extra_head_sections;
         foreach my $post (@posts) {
