@@ -228,6 +228,17 @@ class WWW::StaticBlog::Post
             \$text,
         );
     }
+
+    method url()
+    {
+        return '/' . join(
+            '/',
+            $self->posted_on()->year(),
+            $self->posted_on()->strftime('%m'),
+            $self->posted_on()->strftime('%d'),
+            $self->slug() . '.html',
+        );
+    }
 }
 
 "I don't think there's a punch-line scheduled, is there?";

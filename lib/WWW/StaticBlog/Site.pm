@@ -163,12 +163,10 @@ class WWW::StaticBlog::Site
             $post->save();
             runinterval();
             print "\t" . $post->title();
+            my @path = split('/', $post->url());
             my $out_file = File::Spec->catfile(
                 $self->output_dir(),
-                $post->posted_on()->year(),
-                $post->posted_on()->strftime('%m'),
-                $post->posted_on()->strftime('%d'),
-                $post->slug() . '.html',
+                @path,
             );
 
             my @extra_head_sections;
