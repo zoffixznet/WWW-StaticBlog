@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use WWW::StaticBlog::Site;
+
+my $site = WWW::StaticBlog::Site->new_with_options();
+$site->run();
