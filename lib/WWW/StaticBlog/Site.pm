@@ -155,6 +155,7 @@ class WWW::StaticBlog::Site
     {
         say "Rendering posts:";
         foreach my $post ($self->compendium()->sorted_posts()) {
+            $post->save();
             print "\t" . $post->title();
             my $out_file = File::Spec->catfile(
                 $self->output_dir(),

@@ -15,8 +15,12 @@ class WWW::StaticBlog::Types
         Str
     );
 
-    use DateTime::Format::Natural;
+    use Date::Parse qw(str2time);
+
+    use DateTime::TimeZone;
     use Text::CSV;
+
+    use aliased 'DateTime' => 'RealDateTime';
 
     subtype DateTime,
         as Object,
@@ -25,15 +29,14 @@ class WWW::StaticBlog::Types
     coerce DateTime,
         from Str,
         via {
-            my $parser = DateTime::Format::Natural->new();
-            my $dt = $parser->parse_datetime($_);
+            my $epoch = str2time($_);
 
-            unless ($parser->success()) {
-                warn $parser->error();
-                return;
-            }
+            return RealDateTime->now() unless $epoch;
 
-            return $dt;
+            return RealDateTime->from_epoch(
+                epoch     => $epoch,
+                time_zone => DateTime::TimeZone->new( name => 'local' ),
+            );
         };
 
     subtype TagList,
@@ -44,7 +47,9 @@ class WWW::StaticBlog::Types
         via {
             my $csv = Text::CSV->new({sep_char => ' '});
             $csv->parse($_);
-            return unless $csv->status();
+
+            die "Unable to parse tags from '$_'"
+                unless $csv->status();
 
             return [ $csv->fields() ];
         };

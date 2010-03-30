@@ -18,7 +18,10 @@ class WWW::StaticBlog::Post
     use Email::Simple;
     use Text::Multi;
 
-    use File::Slurp qw( read_file );
+    use File::Slurp qw(
+        read_file
+        write_file
+    );
 
     has title => (
         is      => 'rw',
@@ -39,15 +42,16 @@ class WWW::StaticBlog::Post
         lazy    => 1,
         handles => {
             add_tag     => 'push',
-            num_tags    => 'count',
-            sorted_tags => 'sort',
-            remove_tags => 'clear',
+            all_tags    => 'elements',
             filter_tags => 'grep',
+            num_tags    => 'count',
+            remove_tags => 'clear',
+            sorted_tags => 'sort',
         },
         default => sub {
             my $self = shift;
-            return unless defined $self->_file_contents();
-            return $self->_file_contents_for('Tags');
+            return [] unless defined $self->_file_contents();
+            return $self->_file_contents_for('Tags') || '';
         },
     );
 
@@ -73,6 +77,19 @@ class WWW::StaticBlog::Post
             my $self = shift;
             return unless defined $self->_file_contents();
             return $self->_file_contents_for('Post-Date');
+        },
+    );
+
+    has updated_on => (
+        is      => 'rw',
+        isa     => DateTime|Undef,
+        coerce  => 1,
+        lazy    => 1,
+        default => sub {
+            my $self = shift;
+            return unless defined $self->_file_contents();
+            return $self->_file_contents_for('Updated-On')
+                || $self->posted_on();
         },
     );
 
@@ -189,6 +206,27 @@ class WWW::StaticBlog::Post
     method files_for_css()
     {
         $self->_parser()->css_files();
+    }
+
+    method save()
+    {
+        $self->_file_contents()->header_set( 'Author'     => $self->author()     );
+        $self->_file_contents()->header_set( 'Post-Date'  => $self->posted_on()  );
+        $self->_file_contents()->header_set( 'Slug'       => $self->slug()       );
+        $self->_file_contents()->header_set( 'Tags'       => $self->all_tags()   );
+        $self->_file_contents()->header_set( 'Title'      => $self->title()      );
+        $self->_file_contents()->header_set( 'Updated-On' => $self->updated_on() );
+        $self->_file_contents()->body_set($self->raw_body);
+
+        my $text = $self->_file_contents()->as_string();
+        write_file(
+            $self->filename(),
+            {
+                atomic  => 1,
+                binmode => ':utf-8',
+            },
+            \$text,
+        );
     }
 }
 
