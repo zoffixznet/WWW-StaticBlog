@@ -239,8 +239,8 @@ class WWW::StaticBlog::Site
     {
         say "Cleaning up " . $self->output_dir();
         remove_tree( $self->output_dir(), {keep_root => 1} );
-        $self->render_index();
         $self->render_posts();
+        $self->render_index();
         say "Total time: " . runtime();
     }
 }
