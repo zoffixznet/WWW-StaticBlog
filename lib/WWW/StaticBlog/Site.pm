@@ -10,6 +10,7 @@ class WWW::StaticBlog::Site
     use Cwd                   qw( getcwd      );
     use File::Copy::Recursive qw( rcopy       );
     use File::Path            qw( remove_tree );
+    use List::MoreUtils       qw( uniq        );
 
     use Time::SoFar qw(
         runinterval
@@ -217,14 +218,17 @@ class WWW::StaticBlog::Site
         my @posts = reverse $self->compendium()->sorted_posts();
         @posts = grep { defined } @posts[0..$x];
 
-        my @extra_head_sections;
+        my @extra_style_head_sections;
         foreach my $post (@posts) {
-            push @extra_head_sections, {
+            push @extra_style_head_sections, $post->inline_css()
+                if $post->inline_css();
+        }
+
+        @extra_style_head_sections = map +{
                 name     => 'style',
                 attr     => 'type="text/css"',
-                contents => $post->inline_css(),
-            } if $post->inline_css();
-        }
+                contents => $_,
+        }, uniq @extra_style_head_sections;
 
         my $out_file = File::Spec->catfile(
             $self->output_dir(),
@@ -233,8 +237,8 @@ class WWW::StaticBlog::Site
         $self->_template()->render_to_file(
             $self->index_template(),
             {
-                posts               => [ @posts               ],
-                extra_head_sections => [ @extra_head_sections ],
+                posts               => [ @posts                     ],
+                extra_head_sections => [ @extra_style_head_sections ],
             },
             $out_file,
         );
