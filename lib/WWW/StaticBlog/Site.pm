@@ -265,6 +265,7 @@ class WWW::StaticBlog::Site
 
     method run()
     {
+        say "Enabling debug mode." if $self->debug();
         say "Cleaning up... " . $self->output_dir();
         remove_tree( $self->output_dir(), {keep_root => 1} );
 

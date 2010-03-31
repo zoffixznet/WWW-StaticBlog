@@ -12,7 +12,6 @@ __END__
 
 WWW::StaticBlob - Generate a set of static pages for a blog.
 
-
 =begin readme
 
 =head1 INSTALLATION
