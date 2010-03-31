@@ -135,6 +135,12 @@ class WWW::StaticBlog::Site
         isa      => 'Str',
     );
 
+    has debug => (
+        is      => 'ro',
+        isa     => 'Bool',
+        default => 0,
+    );
+
     method _build_authors()
     {
         return [] unless $self->has_authors_dir();
@@ -170,8 +176,9 @@ class WWW::StaticBlog::Site
         $template_class->new(
             options  => $self->template_options(),
             fixtures => {
-                site_title   => $self->title(),
+                debug        => $self->debug(),
                 site_tagline => $self->tagline(),
+                site_title   => $self->title(),
             },
         );
     }
