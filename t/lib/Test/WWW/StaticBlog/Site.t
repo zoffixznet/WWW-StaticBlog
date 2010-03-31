@@ -53,9 +53,10 @@ testcase WWW::StaticBlog
         my $tmpdir = Directory::Scratch->new();
 
         my $site = WWW::StaticBlog::Site->new(
-            title         => 'WWW::StaticBlog',
-            authors_dir   => "$tmpdir",
-            post_template => 'post',
+            title          => 'WWW::StaticBlog',
+            authors_dir    => "$tmpdir",
+            index_template => 'index',
+            post_template  => 'post',
         );
         $tmpdir->touch('author1.yaml', split("\n", outdent_quote(q|
             ---
