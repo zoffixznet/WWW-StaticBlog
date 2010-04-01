@@ -159,6 +159,12 @@ class WWW::StaticBlog::Site
         default => 10,
     );
 
+    has recent_posts_count => (
+        is      => 'rw',
+        isa     => 'Int',
+        default => 15,
+    );
+
     has url => (
         is      => 'rw',
         isa     => 'Str',
@@ -209,6 +215,9 @@ class WWW::StaticBlog::Site
                 debug        => $self->debug(),
                 site_tagline => $self->tagline(),
                 site_title   => $self->title(),
+                recent_posts => [
+                    $self->compendium()->newest_n_posts($self->recent_posts_count()),
+                ],
             },
         );
     }
