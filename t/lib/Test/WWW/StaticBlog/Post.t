@@ -4,6 +4,7 @@ testcase Test::WWW::StaticBlog::Post
 {
     use WWW::StaticBlog::Post;
 
+    use File::Slurp   qw( read_file     );
     use Test::TempDir qw( tempfile      );
     use Text::Outdent qw( outdent_quote );
 
@@ -388,6 +389,38 @@ testcase Test::WWW::StaticBlog::Post
             join(':', $post->files_for_css()),
             qr|Text/Multi/Block/Code\.css$|,
             'files_for_css',
+        );
+    }
+
+    test saves_posts_properly()
+    {
+        my (undef, $post_filename) = tempfile();
+
+        my $post = WWW::StaticBlog::Post->new(
+            filename  => $post_filename,
+            title     => "This was written? I don't think so...",
+            author    => 'jhelwig',
+            tags      => [qw(mst3k robots movies), 'bad movies'],
+            posted_on => '1997-11-22 18:00:00',
+            raw_body  => "Matt, it's time for you to decide if you're going to be one of my team players or not."
+        );
+
+        assert($post->save());
+
+        my $expected = outdent_quote(qq|
+            Author: jhelwig
+            Post-Date: 1997-11-22T18:00:00
+            Slug: this_was_written__i_don_t_think_so___
+            Title: This was written? I don't think so...
+            Updated-On: 1997-11-22T18:00:00
+            Tags: "bad movies" movies mst3k robots
+
+            Matt, it's time for you to decide if you're going to be one of my team players or not.
+        |);
+        chomp $expected;
+        assert_eq(
+            scalar read_file($post_filename),
+            $expected,
         );
     }
 

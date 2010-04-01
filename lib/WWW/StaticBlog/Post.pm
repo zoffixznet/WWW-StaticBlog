@@ -15,8 +15,9 @@ class WWW::StaticBlog::Post
 
     use aliased 'DateTime' => 'DT';
 
-    use Email::Simple;
-    use Text::Multi;
+    use Email::Simple ();
+    use Text::CSV ();
+    use Text::Multi ();
 
     use File::Slurp qw(
         read_file
@@ -216,10 +217,14 @@ class WWW::StaticBlog::Post
         $self->_file_contents()->header_set( 'Author'     => $self->author()     );
         $self->_file_contents()->header_set( 'Post-Date'  => $self->posted_on()  );
         $self->_file_contents()->header_set( 'Slug'       => $self->slug()       );
-        $self->_file_contents()->header_set( 'Tags'       => $self->all_tags()   );
         $self->_file_contents()->header_set( 'Title'      => $self->title()      );
         $self->_file_contents()->header_set( 'Updated-On' => $self->updated_on() );
         $self->_file_contents()->body_set($self->raw_body);
+        if ($self->num_tags) {
+            my $csv = Text::CSV->new({sep_char => ' '});
+            $csv->combine(sort $self->all_tags()) || die 'Could not save tags.';
+            $self->_file_contents()->header_set('Tags' => $csv->string());
+        }
 
         my $text = $self->_file_contents()->as_string();
         write_file(

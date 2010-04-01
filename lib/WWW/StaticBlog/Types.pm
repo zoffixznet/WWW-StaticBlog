@@ -51,6 +51,6 @@ class WWW::StaticBlog::Types
             die "Unable to parse tags from '$_'"
                 unless $csv->status();
 
-            return [ $csv->fields() ];
+            return [ grep { /./ } $csv->fields() ];
         };
 }
