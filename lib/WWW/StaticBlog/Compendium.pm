@@ -49,6 +49,20 @@ class WWW::StaticBlog::Compendium
         );
     }
 
+    method newest_n_posts($n)
+    {
+        my @posts = $self->_sorted_posts(
+            sub {
+                DateTime->compare(
+                    $_[1]->posted_on() || DateTime->now(),
+                    $_[0]->posted_on() || DateTime->now(),
+                )
+            }
+        );
+
+        return grep { defined } @posts[0..$n];
+    }
+
     method posts_for_author($author)
     {
         return $self->_posts_for_author_obj($author)

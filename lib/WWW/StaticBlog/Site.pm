@@ -9,16 +9,23 @@ class WWW::StaticBlog::Site
 {
     use Cwd                   qw( getcwd      );
     use File::Copy::Recursive qw( rcopy       );
-    use File::Path            qw( remove_tree );
+    use File::Slurp           qw( write_file  );
     use List::MoreUtils       qw( uniq        );
 
+    use File::Path qw(
+        make_path
+        remove_tree
+    );
     use Time::SoFar qw(
         runinterval
         runtime
     );
 
-    use WWW::StaticBlog::Author;
-    use WWW::StaticBlog::Compendium;
+    use DateTime ();
+    use File::Spec ();
+    use WWW::StaticBlog::Author ();
+    use WWW::StaticBlog::Compendium ();
+    use XML::Atom::SimpleFeed ();
 
     has title => (
         is       => 'rw',
@@ -136,9 +143,32 @@ class WWW::StaticBlog::Site
     );
 
     has debug => (
-        is      => 'ro',
+        is      => 'rw',
         isa     => 'Bool',
         default => 0,
+    );
+
+    has post_feed => (
+        is  => 'rw',
+        isa => 'Str|Undef',
+    );
+
+    has post_feed_count => (
+        is      => 'rw',
+        isa     => 'Int',
+        default => 10,
+    );
+
+    has url => (
+        is      => 'rw',
+        isa     => 'Str',
+        lazy    => 1,
+        default => sub {
+            my $self = shift;
+            die "url required with post_feed"
+                if $self->post_feed();
+            return '';
+        },
     );
 
     method _build_authors()
@@ -221,10 +251,7 @@ class WWW::StaticBlog::Site
         runinterval();
         print "Rendering index... ";
 
-        my $x = $self->index_post_count() - 1;
-        my @posts = reverse $self->compendium()->sorted_posts();
-        @posts = grep { defined } @posts[0..$x];
-
+        my @posts = $self->compendium()->newest_n_posts($self->index_post_count());
         my @extra_style_head_sections;
         foreach my $post (@posts) {
             push @extra_style_head_sections, $post->inline_css()
@@ -253,6 +280,56 @@ class WWW::StaticBlog::Site
         say "(" . runinterval() . ")";
     }
 
+    method render_post_feed()
+    {
+        return unless $self->post_feed();
+        runinterval();
+        print "Generating post feed... ";
+
+        my $feed = XML::Atom::SimpleFeed->new(
+            title     => $self->title(),
+            subtitle  => $self->tagline(),
+            updated   => DateTime->now()->iso8601(),
+            generator => 'WWW::StaticBlog',
+            link      => $self->url(),
+            link      => {
+                rel  => 'self',
+                href => $self->url() . $self->post_feed(),
+            },
+        );
+
+        foreach my $post (reverse $self->compendium()->newest_n_posts($self->post_feed_count())) {
+            $feed->add_entry(
+                title     => $post->title(),
+                link      => $self->url() . $post->url(),
+                id        => $self->url() . $post->url(),
+                author    => $post->author(),
+                content   => $post->body(),
+                published => $post->posted_on(),
+                updated   => $post->updated_on(),
+                (map {
+                    (category => $_)
+                } ($post->sorted_tags())),
+            );
+        }
+
+        my $out_file = File::Spec->catfile(
+            $self->output_dir(),
+            $self->post_feed(),
+        );
+
+        my (undef, $out_dir, undef) = File::Spec->splitpath($out_file);
+        die "Could not create $out_dir"
+            unless make_path($out_dir);
+
+        write_file(
+            $out_file,
+            $feed->as_string(),
+        );
+
+        say $self->post_feed() . "(" . runinterval() . ")";
+    }
+
     method copy_static_files()
     {
         return unless $self->has_static_dir();
@@ -271,6 +348,7 @@ class WWW::StaticBlog::Site
 
         $self->render_posts();
         $self->render_index();
+        $self->render_post_feed();
         $self->copy_static_files();
 
         say "Total time: " . runtime();
