@@ -10,9 +10,11 @@ class WWW::StaticBlog::Compendium
         Undef
     );
 
-    use DateTime;
+    use List::MoreUtils qw(any);
 
-    use WWW::StaticBlog::Post;
+    use DateTime ();
+    use Set::Object ();
+    use WWW::StaticBlog::Post ();
 
     has posts => (
         is      => 'rw',
@@ -104,6 +106,37 @@ class WWW::StaticBlog::Compendium
     {
         $self->clear_posts();
         $self->posts($self->_build_posts());
+    }
+
+    method all_tags()
+    {
+        my $set = Set::Object->new();
+
+        foreach my $post ($self->all_posts()) {
+            $set->insert($post->all_tags());
+        }
+
+        return sort $set->members();
+    }
+
+    method posts_for_tags(@tags)
+    {
+        my @posts = $self->all_posts();
+        foreach my $tag (@tags) {
+            @posts = $self->_filter_posts_to_tag($tag, @posts);
+            return unless @posts;
+        }
+
+        return @posts;
+    }
+
+    method _filter_posts_to_tag($tag, @posts)
+    {
+        return grep {
+            any {
+                $_ =~ m/$tag/;
+            } $_->all_tags();
+        } @posts;
     }
 }
 
