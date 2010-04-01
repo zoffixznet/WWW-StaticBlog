@@ -2,6 +2,7 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Template::Toolkit
 {
+    use Hash::Merge qw(merge);
 
     method render($template, HashRef $contents)
     {
@@ -16,7 +17,10 @@ class WWW::StaticBlog::Template::Toolkit
     {
         $self->template_engine->process(
             $template,
-            $contents,
+            merge(
+                { constants => $self->fixtures},
+                $contents,
+            ),
             $out_file_name,
             binmode => ':utf8',
         ) || die $self->template_engine()->error();
@@ -29,10 +33,7 @@ class WWW::StaticBlog::Template::Toolkit
         Class::MOP::load_class($self->template_class());
 
         return $self->template_class()->new(
-            {
-                %{$self->options()},
-                CONSTANTS => $self->fixtures(),
-            }
+            $self->options()
         );
     }
 
