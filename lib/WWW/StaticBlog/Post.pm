@@ -180,11 +180,13 @@ class WWW::StaticBlog::Post
 
     method _build_slug()
     {
-        my $slug = $self->_file_contents_for('Slug');
-        $slug //= $self->title();
+        return $self->_file_contents_for('Slug')
+            if defined $self->_file_contents_for('Slug');
+
+        my $slug = $self->title();
         return unless defined $slug;
 
-        $slug =~ s|[:/?#[\]@!\$&'()*+,;=]||g;
+        $slug =~ s|[:/?#[\]@!\$&'()*+,;=.]|_|g;
         $slug =~ s/ +/_/g;
 
         return lc $slug;
