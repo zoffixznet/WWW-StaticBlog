@@ -215,11 +215,26 @@ class WWW::StaticBlog::Site
                 debug        => $self->debug(),
                 site_tagline => $self->tagline(),
                 site_title   => $self->title(),
+                tags         => $self->_tag_fixture_data(),
                 recent_posts => [
                     $self->compendium()->newest_n_posts($self->recent_posts_count()),
                 ],
             },
         );
+    }
+
+    method _tag_fixture_data()
+    {
+        my @fixture_data;
+        foreach my $tag ($self->compendium()->all_tags()) {
+            push @fixture_data, {
+                url   => "tags/$tag",
+                name  => $tag,
+                count => scalar $self->compendium()->posts_for_tags($tag),
+            };
+        }
+
+        return \@fixture_data;
     }
 
     method render_posts()
