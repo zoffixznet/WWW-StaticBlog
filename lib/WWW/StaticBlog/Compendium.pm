@@ -44,22 +44,30 @@ class WWW::StaticBlog::Compendium
         return $self->_sorted_posts(
             sub {
                 DateTime->compare(
-                    $_[0]->posted_on() || DateTime->now(),
-                    $_[1]->posted_on() || DateTime->now(),
+                    $_[0]->posted_on(),
+                    $_[1]->posted_on(),
                 )
             }
         );
     }
 
+    method _sort_posts_by_date_descending(@posts)
+    {
+        # TODO: Figure out why this doesn't work as "return sort ..."
+        my @sorted_posts = sort {
+            DateTime->compare(
+                $b->posted_on(),
+                $a->posted_on(),
+            )
+        } @posts;
+
+        return @sorted_posts;
+    }
+
     method newest_n_posts($n)
     {
-        my @posts = $self->_sorted_posts(
-            sub {
-                DateTime->compare(
-                    $_[1]->posted_on() || DateTime->now(),
-                    $_[0]->posted_on() || DateTime->now(),
-                )
-            }
+        my @posts = $self->_sort_posts_by_date_descending(
+            $self->all_posts()
         );
 
         return grep { defined } @posts[0..$n];
@@ -127,7 +135,7 @@ class WWW::StaticBlog::Compendium
             return unless @posts;
         }
 
-        return @posts;
+        return $self->_sort_posts_by_date_descending(@posts);
     }
 
     method _filter_posts_to_tag($tag, @posts)
