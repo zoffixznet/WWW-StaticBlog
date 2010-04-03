@@ -252,7 +252,6 @@ class WWW::StaticBlog::Site
     {
         say "Rendering posts:";
         foreach my $post ($self->compendium()->sorted_posts()) {
-            $post->save();
             runinterval();
             print "\t" . $post->title();
             my @path = split('/', $post->url());
@@ -515,6 +514,11 @@ class WWW::StaticBlog::Site
         $self->render_post_feed();
         $self->render_tags();
         $self->copy_static_files();
+
+        runinterval();
+        print "Saving post data... ";
+        $_->save() for $self->compendium()->all_posts();
+        say "(" . runinterval() . ")";
 
         say "Total time: " . runtime();
     }
