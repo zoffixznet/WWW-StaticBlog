@@ -7,14 +7,19 @@ class WWW::StaticBlog::Site
     with MooseX::SimpleConfig
     with MooseX::Getopt
 {
-    use Cwd                   qw( getcwd      );
-    use File::Copy::Recursive qw( rcopy       );
-    use File::Slurp           qw( write_file  );
-    use List::MoreUtils       qw( uniq        );
+    use Cwd                   qw( getcwd                );
+    use File::Copy::Recursive qw( rcopy                 );
+    use File::Slurp           qw( write_file            );
+    use List::PowerSet        qw( powerset              );
+    use WWW::StaticBlog::Util qw( sanitize_for_dir_name );
 
     use File::Path qw(
         make_path
         remove_tree
+    );
+    use List::MoreUtils qw(
+        any
+        uniq
     );
     use Time::SoFar qw(
         runinterval
@@ -23,6 +28,7 @@ class WWW::StaticBlog::Site
 
     use DateTime ();
     use File::Spec ();
+    use Set::Object ();
     use WWW::StaticBlog::Author ();
     use WWW::StaticBlog::Compendium ();
     use XML::Atom::SimpleFeed ();
@@ -138,8 +144,13 @@ class WWW::StaticBlog::Site
     );
 
     has author_template => (
-        is       => 'rw',
-        isa      => 'Str',
+        is  => 'rw',
+        isa => 'Str',
+    );
+
+    has tag_template => (
+        is  => 'rw',
+        isa => 'Str',
     );
 
     has debug => (
@@ -228,7 +239,7 @@ class WWW::StaticBlog::Site
         my @fixture_data;
         foreach my $tag ($self->compendium()->all_tags()) {
             push @fixture_data, {
-                url   => "tags/$tag",
+                url   => "/tags/$tag",
                 name  => $tag,
                 count => scalar $self->compendium()->posts_for_tags($tag),
             };
@@ -276,17 +287,7 @@ class WWW::StaticBlog::Site
         print "Rendering index... ";
 
         my @posts = $self->compendium()->newest_n_posts($self->index_post_count());
-        my @extra_style_head_sections;
-        foreach my $post (@posts) {
-            push @extra_style_head_sections, $post->inline_css()
-                if $post->inline_css();
-        }
-
-        @extra_style_head_sections = map +{
-                name     => 'style',
-                attr     => 'type="text/css"',
-                contents => $_,
-        }, uniq @extra_style_head_sections;
+        my @extra_post_head_sections = $self->_unique_head_sections_for_posts(@posts);
 
         my $out_file = File::Spec->catfile(
             $self->output_dir(),
@@ -295,13 +296,28 @@ class WWW::StaticBlog::Site
         $self->_template()->render_to_file(
             $self->index_template(),
             {
-                posts               => [ @posts                     ],
-                extra_head_sections => [ @extra_style_head_sections ],
+                posts               => [ @posts                    ],
+                extra_head_sections => [ @extra_post_head_sections ],
             },
             $out_file,
         );
 
         say "(" . runinterval() . ")";
+    }
+
+    method _unique_head_sections_for_posts(@posts)
+    {
+        my @extra_style_head_sections;
+        foreach my $post (@posts) {
+            push @extra_style_head_sections, $post->inline_css()
+                if $post->inline_css();
+        }
+
+        return map +{
+                name     => 'style',
+                attr     => 'type="text/css"',
+                contents => $_,
+        }, uniq @extra_style_head_sections;
     }
 
     method render_post_feed()
@@ -351,7 +367,131 @@ class WWW::StaticBlog::Site
             $feed->as_string(),
         );
 
-        say $self->post_feed() . "(" . runinterval() . ")";
+        say $self->post_feed() . " (" . runinterval() . ")";
+    }
+
+    method render_tags()
+    {
+        runinterval();
+        print "Finding unique tag combinations with posts...";
+        my @all_tags = $self->compendium()->all_tags();
+
+        my @tag_sets = map {
+            [ $_->all_tags() ]
+        } $self->compendium()->all_posts();
+
+        push(
+            @tag_sets,
+            grep { scalar @{$_} }
+            map {
+                @{powerset(@$_)}
+            } @tag_sets
+        );
+        push @tag_sets, map {[$_]} @all_tags;
+
+        @tag_sets = do {
+            use Data::Dumper;
+            my %seen;
+            map { $_->[0] }
+            grep { !$seen{$_->[1]}++ }
+            map { [ $_, Dumper($_) ] }
+            @tag_sets
+        };
+
+        @tag_sets = uniq(@tag_sets);
+        say " (" . runinterval() . ")";
+
+        my $all_tags = Set::Object->new();
+        $all_tags->insert(@all_tags);
+        while (my $tag_set = shift @tag_sets) {
+            my $tag_page = $self->_partial_url_for_tag_set(@$tag_set);
+            my @posts    = $self->compendium()->posts_for_tags(@$tag_set);
+
+            say "\t$tag_page";
+            say "\t\tFound @{[ scalar @posts ]} post(s) (" . runinterval() . ")";
+
+            print "\t\tRendering...";
+
+            my $other_tags = $all_tags - Set::Object->new()->insert(@$tag_set);
+            $self->_render_tags_for_set_and_posts(
+                $tag_page,
+                $tag_set,
+                \@posts,
+                [$other_tags->members()],
+            );
+
+            say " done (" . runinterval() . ")";
+        }
+
+    }
+
+    method _render_tags_for_set_and_posts($tag_page, $tag_set, $posts, $other_tags)
+    {
+        my @plus_tags;
+        my %additional_tags_with_posts = $self->_other_tags_with_posts($tag_set, $other_tags);
+        foreach my $tag (sort keys %additional_tags_with_posts) {
+            push(
+                @plus_tags,
+                {
+                    name  => $tag,
+                    link  => $self->_url_for_tag_set(@$tag_set, $tag),
+                    count => $additional_tags_with_posts{$tag},
+                },
+            );
+        }
+
+        my %minus_tags;
+        foreach my $tag (@$tag_set) {
+            my $new_tagset = Set::Object->new();
+            $new_tagset->insert(@$tag_set);
+            $new_tagset->remove($tag);
+            next unless $new_tagset->members();
+
+            $minus_tags{$tag} = $self->_url_for_tag_set($new_tagset->members());
+        }
+
+        $self->_template()->render_to_file(
+            $self->tag_template(),
+            {
+                posts               => $posts,
+                extra_head_sections => [$self->_unique_head_sections_for_posts(@$posts)],
+                tags                => $tag_set,
+                minus               => \%minus_tags,
+                plus                => \@plus_tags,
+            },
+            File::Spec->catfile(
+                $self->output_dir(),
+                'tags',
+                $tag_page,
+            ),
+        );
+    }
+
+    method _other_tags_with_posts($current_tags, $other_tags)
+    {
+        my %tags_with_posts;
+        foreach my $tag (@$other_tags) {
+            next if any { $tag eq $_ } @$current_tags;
+
+            my $post_count = $self->compendium()->posts_for_tags(@$current_tags, $tag);
+            next unless $post_count;
+
+            $tags_with_posts{$tag} = $post_count;
+        }
+        return %tags_with_posts;
+    }
+
+    method _url_for_tag_set(@tags)
+    {
+        return '/tags/' . $self->_partial_url_for_tag_set(@tags);
+    }
+
+    method _partial_url_for_tag_set(@tags)
+    {
+            my $tag_page = join(
+                '/',
+                map {sanitize_for_dir_name($_)} sort @tags
+            ) . '.html';
     }
 
     method copy_static_files()
@@ -373,6 +513,7 @@ class WWW::StaticBlog::Site
         $self->render_posts();
         $self->render_index();
         $self->render_post_feed();
+        $self->render_tags();
         $self->copy_static_files();
 
         say "Total time: " . runtime();

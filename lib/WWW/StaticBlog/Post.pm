@@ -12,6 +12,9 @@ class WWW::StaticBlog::Post
         DateTime
         TagList
     );
+    use WWW::StaticBlog::Util qw(
+        sanitize_for_dir_name
+    );
 
     use aliased 'DateTime' => 'DT';
 
@@ -187,10 +190,7 @@ class WWW::StaticBlog::Post
         my $slug = $self->title();
         return unless defined $slug;
 
-        $slug =~ s|[:/?#[\]@!\$&'()*+,;=.]|_|g;
-        $slug =~ s/ +/_/g;
-
-        return lc $slug;
+        return lc sanitize_for_dir_name($slug);
     }
 
     method body($debug = 0)
