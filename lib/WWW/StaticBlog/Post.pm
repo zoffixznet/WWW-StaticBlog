@@ -55,7 +55,7 @@ class WWW::StaticBlog::Post
         default => sub {
             my $self = shift;
             return [] unless defined $self->_file_contents();
-            return $self->_file_contents_for('Tags') || '';
+            return $self->_file_contents_for('Tags') // '';
         },
     );
 
@@ -81,7 +81,7 @@ class WWW::StaticBlog::Post
             my $self = shift;
             return unless defined $self->_file_contents();
             return $self->_file_contents_for('Post-Date')
-                || DT->from_epoch(
+                // DT->from_epoch(
                     epoch     => time(),
                     time_zone => DateTime::TimeZone->new(name => 'local'),
                 );
@@ -97,7 +97,7 @@ class WWW::StaticBlog::Post
             my $self = shift;
             return unless defined $self->_file_contents();
             return $self->_file_contents_for('Updated-On')
-                || (
+                // (
                     $self->_file_contents_for('Post-Date')
                     ? DT->from_epoch(
                         epoch     => time(),
@@ -105,7 +105,7 @@ class WWW::StaticBlog::Post
                     )
                     : undef
                 )
-                || $self->posted_on();
+                // $self->posted_on();
         },
     );
 
