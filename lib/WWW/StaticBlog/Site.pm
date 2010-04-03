@@ -239,7 +239,7 @@ class WWW::StaticBlog::Site
         my @fixture_data;
         foreach my $tag ($self->compendium()->all_tags()) {
             push @fixture_data, {
-                url   => "/tags/$tag",
+                url   => "/tags/$tag.html",
                 name  => $tag,
                 count => scalar $self->compendium()->posts_for_tags($tag),
             };
