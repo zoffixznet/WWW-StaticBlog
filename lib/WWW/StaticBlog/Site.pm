@@ -337,7 +337,7 @@ class WWW::StaticBlog::Site
             },
         );
 
-        foreach my $post (reverse $self->compendium()->newest_n_posts($self->post_feed_count())) {
+        foreach my $post ($self->compendium()->newest_n_posts($self->post_feed_count())) {
             $feed->add_entry(
                 title     => $post->title(),
                 link      => $self->url() . $post->url(),
