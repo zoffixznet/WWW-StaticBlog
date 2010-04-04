@@ -481,7 +481,7 @@ class WWW::StaticBlog::Site
     {
             my $tag_page = join(
                 '/',
-                map {sanitize_for_dir_name($_->name())} sort @tags
+                sort map {sanitize_for_dir_name($_->name())} @tags
             ) . '.html';
     }
 
