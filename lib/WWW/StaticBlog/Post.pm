@@ -47,10 +47,9 @@ class WWW::StaticBlog::Post
         handles => {
             add_tag     => 'push',
             all_tags    => 'elements',
-            filter_tags => 'grep',
             num_tags    => 'count',
             remove_tags => 'clear',
-            sorted_tags => 'sort',
+            _sorted_tags => 'sort',
         },
         default => sub {
             my $self = shift;
@@ -156,6 +155,13 @@ class WWW::StaticBlog::Post
         clearer    => '_clear_parser',
     );
 
+    method sorted_tags()
+    {
+        return $self->_sorted_tags(
+            sub { $_[0]->name() cmp $_[1]->name() }
+        );
+    }
+
     sub _raw_body_trigger
     {
         my ($self, $body, $old_body) = @_;
@@ -233,7 +239,12 @@ class WWW::StaticBlog::Post
         $self->_file_contents()->body_set($self->raw_body);
         if ($self->num_tags) {
             my $csv = Text::CSV->new({sep_char => ' '});
-            $csv->combine(sort $self->all_tags()) || die 'Could not save tags.';
+
+            $csv->combine(
+                sort
+                map { $_->name() } $self->all_tags()
+            ) or die 'Could not save tags.';
+
             $self->_file_contents()->header_set('Tags' => $csv->string());
         }
 

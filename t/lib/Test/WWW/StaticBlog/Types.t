@@ -16,7 +16,6 @@ class Test::WWW::StaticBlog::Types::TestClass
             num_tags    => 'count',
             sorted_tags => 'sort',
             clear_tags  => 'clear',
-            filter_tags => 'grep',
         },
     );
 

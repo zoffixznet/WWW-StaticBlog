@@ -17,8 +17,9 @@ class WWW::StaticBlog::Types
 
     use Date::Parse qw(str2time);
 
-    use DateTime::TimeZone;
-    use Text::CSV;
+    use DateTime::TimeZone ();
+    use Text::CSV ();
+    use WWW::StaticBlog::Tag ();
 
     use aliased 'DateTime' => 'RealDateTime';
 
@@ -40,7 +41,7 @@ class WWW::StaticBlog::Types
         };
 
     subtype TagList,
-        as ArrayRef[Str];
+        as ArrayRef['WWW::StaticBlog::Tag'];
 
     coerce TagList,
         from Str,
@@ -51,6 +52,9 @@ class WWW::StaticBlog::Types
             die "Unable to parse tags from '$_'"
                 unless $csv->status();
 
-            return [ grep { /./ } $csv->fields() ];
+            return [
+                map { WWW::StaticBlog::Tag->new($_) }
+                grep { /./ } $csv->fields()
+            ];
         };
 }

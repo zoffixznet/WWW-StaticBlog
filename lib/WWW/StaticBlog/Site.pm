@@ -31,6 +31,7 @@ class WWW::StaticBlog::Site
     use Set::Object ();
     use WWW::StaticBlog::Author ();
     use WWW::StaticBlog::Compendium ();
+    use WWW::StaticBlog::Tag ();
     use XML::Atom::SimpleFeed ();
 
     has title => (
@@ -226,26 +227,14 @@ class WWW::StaticBlog::Site
                 debug        => $self->debug(),
                 site_tagline => $self->tagline(),
                 site_title   => $self->title(),
-                tags         => $self->_tag_fixture_data(),
+                tags         => [
+                    $self->compendium()->all_tags(),
+                ],
                 recent_posts => [
                     $self->compendium()->newest_n_posts($self->recent_posts_count()),
                 ],
             },
         );
-    }
-
-    method _tag_fixture_data()
-    {
-        my @fixture_data;
-        foreach my $tag ($self->compendium()->all_tags()) {
-            push @fixture_data, {
-                url   => "/tags/$tag.html",
-                name  => $tag,
-                count => scalar $self->compendium()->posts_for_tags($tag),
-            };
-        }
-
-        return \@fixture_data;
     }
 
     method render_posts()
@@ -347,7 +336,7 @@ class WWW::StaticBlog::Site
                 published => $post->posted_on(),
                 updated   => $post->updated_on(),
                 (map {
-                    (category => $_)
+                    (category => $_->name())
                 } ($post->sorted_tags())),
             );
         }
@@ -433,8 +422,11 @@ class WWW::StaticBlog::Site
                 @plus_tags,
                 {
                     name  => $tag,
-                    link  => $self->_url_for_tag_set(@$tag_set, $tag),
                     count => $additional_tags_with_posts{$tag},
+                    link  => $self->_url_for_tag_set(
+                        @$tag_set,
+                        WWW::StaticBlog::Tag->new($tag),
+                    ),
                 },
             );
         }
@@ -446,7 +438,7 @@ class WWW::StaticBlog::Site
             $new_tagset->remove($tag);
             next unless $new_tagset->members();
 
-            $minus_tags{$tag} = $self->_url_for_tag_set($new_tagset->members());
+            $minus_tags{$tag->name()} = $self->_url_for_tag_set($new_tagset->members());
         }
 
         $self->_template()->render_to_file(
@@ -475,7 +467,7 @@ class WWW::StaticBlog::Site
             my $post_count = $self->compendium()->posts_for_tags(@$current_tags, $tag);
             next unless $post_count;
 
-            $tags_with_posts{$tag} = $post_count;
+            $tags_with_posts{$tag->name()} = $post_count;
         }
         return %tags_with_posts;
     }
@@ -489,7 +481,7 @@ class WWW::StaticBlog::Site
     {
             my $tag_page = join(
                 '/',
-                map {sanitize_for_dir_name($_)} sort @tags
+                map {sanitize_for_dir_name($_->name())} sort @tags
             ) . '.html';
     }
 
