@@ -2,6 +2,8 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Author
 {
+    our $VERSION = '0.001';
+
     use Config::JFDI ();
 
     has name => (

@@ -2,6 +2,8 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Types
 {
+    our $VERSION = '0.001';
+
     use MooseX::Types
         -declare => [qw(
             DateTime

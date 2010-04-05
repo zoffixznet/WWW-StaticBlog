@@ -2,6 +2,8 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Util
 {
+    our $VERSION = '0.001';
+
     use Moose::Exporter;
 
     method sanitize_for_dir_name($text)

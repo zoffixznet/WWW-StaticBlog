@@ -4,6 +4,8 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Post
 {
+    our $VERSION = '0.001';
+
     use MooseX::Types::Moose qw(
         Str
         Undef

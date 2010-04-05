@@ -2,6 +2,8 @@ use MooseX::Declare;
 
 role WWW::StaticBlog::Role::FileLoader
 {
+    our $VERSION = '0.001';
+
     use File::Find qw(find);
     use File::Spec ();
 

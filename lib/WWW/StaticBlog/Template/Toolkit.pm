@@ -2,6 +2,8 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Template::Toolkit
 {
+    our $VERSION = '0.001';
+
     use Hash::Merge qw(merge);
 
     method render($template, HashRef $contents)

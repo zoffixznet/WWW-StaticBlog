@@ -4,6 +4,7 @@ use MooseX::Declare;
 
 class WWW::StaticBlog
 {
+    our $VERSION = '0.001';
 }
 
 "My hovercraft is full of eels.";

@@ -7,6 +7,8 @@ class WWW::StaticBlog::Site
     with MooseX::SimpleConfig
     with MooseX::Getopt
 {
+    our $VERSION = '0.001';
+
     use Cwd                   qw( getcwd                );
     use File::Copy::Recursive qw( rcopy                 );
     use File::Slurp           qw( write_file            );
@@ -485,6 +487,14 @@ class WWW::StaticBlog::Site
             ) . '.html';
     }
 
+    method render_archives()
+    {
+        say "Rendering archive pages...";
+
+        my $archive;
+        print "\t$archive ";
+    }
+
     method copy_static_files()
     {
         return unless $self->has_static_dir();
@@ -505,6 +515,7 @@ class WWW::StaticBlog::Site
         $self->render_index();
         $self->render_post_feed();
         $self->render_tags();
+#        $self->render_archives();
         $self->copy_static_files();
 
         runinterval();

@@ -1,5 +1,7 @@
 package WWW::StaticBlog::Compendium;
 
+our $VERSION = '0.001';
+
 use 5.010;
 use Moose;
 use MooseX::Method::Signatures;

@@ -2,6 +2,8 @@ use MooseX::Declare;
 
 role WWW::StaticBlog::Role::Template
 {
+    our $VERSION = '0.001';
+
     use Class::MOP;
 
     has template_class => (
