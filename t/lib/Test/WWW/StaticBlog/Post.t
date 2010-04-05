@@ -2,7 +2,8 @@ use Test::Mini::Unit;
 
 testcase Test::WWW::StaticBlog::Post
 {
-    use WWW::StaticBlog::Post;
+    use WWW::StaticBlog::Post ();
+    use WWW::StaticBlog::Tag ();
 
     use File::Slurp   qw( read_file     );
     use Test::TempDir qw( tempfile      );
@@ -47,11 +48,11 @@ testcase Test::WWW::StaticBlog::Post
         );
         assert_eq(
             $post->tags(),
-            [
+            [ map { WWW::StaticBlog::Tag->new($_) } (
                 'First',
                 'post!',
                 'Aw, jeah.',
-            ],
+            )],
             'tags',
         );
         assert_eq(
@@ -240,11 +241,11 @@ testcase Test::WWW::StaticBlog::Post
         );
         assert_eq(
             $post->tags(),
-            [
+            [ map { WWW::StaticBlog::Tag->new($_) } (
                 'First',
                 'post!',
                 'Aw, jeah.',
-            ],
+            )],
             'tags',
         );
         assert_eq(
@@ -397,12 +398,13 @@ testcase Test::WWW::StaticBlog::Post
         my (undef, $post_filename) = tempfile();
 
         my $post = WWW::StaticBlog::Post->new(
-            filename  => $post_filename,
-            title     => "This was written? I don't think so...",
-            author    => 'jhelwig',
-            tags      => [qw(mst3k robots movies), 'bad movies'],
-            posted_on => '1997-11-22 18:00:00',
-            raw_body  => "Matt, it's time for you to decide if you're going to be one of my team players or not."
+            filename   => $post_filename,
+            title      => "This was written? I don't think so...",
+            author     => 'jhelwig',
+            tags       => 'mst3k robots movies "bad movies"',
+            posted_on  => '1997-11-22 18:00:00',
+            updated_on => '1997-11-22 18:00:00',
+            raw_body   => "Matt, it's time for you to decide if you're going to be one of my team players or not."
         );
 
         assert($post->save());

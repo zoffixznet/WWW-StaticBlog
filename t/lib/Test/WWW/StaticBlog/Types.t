@@ -13,11 +13,17 @@ class Test::WWW::StaticBlog::Types::TestClass
         isa     => TagList,
         coerce  => 1,
         handles => {
-            num_tags    => 'count',
-            sorted_tags => 'sort',
-            clear_tags  => 'clear',
+            all_tags     => 'elements',
+            clear_tags   => 'clear',
+            num_tags     => 'count',
+            _sorted_tags => 'sort',
         },
     );
+
+    method sorted_tags()
+    {
+        return sort { $a->name() cmp $b->name() } $self->all_tags();
+    }
 
     has datetime => (
         is        => 'rw',
@@ -30,6 +36,8 @@ class Test::WWW::StaticBlog::Types::TestClass
 
 testcase Test::WWW::StaticBlog::Types
 {
+    use WWW::StaticBlog::Tag ();
+
     test split_tags_on_whitespace
     {
         my $types = Test::WWW::StaticBlog::Types::TestClass->new(
@@ -38,7 +46,7 @@ testcase Test::WWW::StaticBlog::Types
 
         assert_eq(
             [ $types->sorted_tags() ],
-            [qw(
+            [ map { WWW::StaticBlog::Tag->new($_) } qw(
                 be
                 several
                 should
@@ -56,12 +64,12 @@ testcase Test::WWW::StaticBlog::Types
 
         assert_eq(
             [ $types->sorted_tags() ],
-            [
+            [ map { WWW::StaticBlog::Tag->new($_) } (
                 'be',
                 'several tags',
                 'should',
                 'there',
-            ],
+            )],
         );
     }
 
