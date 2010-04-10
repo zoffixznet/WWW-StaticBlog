@@ -484,7 +484,7 @@ class WWW::StaticBlog::Site
             my $tag_page = join(
                 '/',
                 sort map {sanitize_for_dir_name($_->name())} @tags
-            ) . '.html';
+            ) . '/index.html';
     }
 
     method render_archives()

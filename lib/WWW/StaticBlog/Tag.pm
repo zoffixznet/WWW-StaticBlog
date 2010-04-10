@@ -30,7 +30,7 @@ has url => (
     lazy    => 1,
     default => sub {
         my $self = shift;
-        return '/tags/' . sanitize_for_dir_name($self->name()) . '.html';
+        return '/tags/' . sanitize_for_dir_name($self->name()) . '/index.html';
     },
 );
 
