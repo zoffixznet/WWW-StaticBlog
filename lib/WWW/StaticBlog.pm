@@ -11,7 +11,7 @@ class WWW::StaticBlog
 __END__
 =head1 NAME
 
-WWW::StaticBlob - Generate a set of static pages for a blog.
+WWW::StaticBlog - Generate a set of static pages for a blog.
 
 =begin readme
 
