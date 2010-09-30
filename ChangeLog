@@ -1,5 +1,13 @@
 Revision history for Perl extension WWW-StaticBlog
 
+0.02  Thu, 30 Sep 2010 03:17:57 -0000 (Jacob Helwig <jhelwig@cpan.org>)
+     - Update tag pages to be tag/index.html, instead of tag.html
+     - Update to use the latest beta version of Test::Mini.
+     - Fix typo in POD
+     - Ditch Dist::Zilla in favor of Module::Install and ShipIt
+     - Add author only test for checking spelling in POD.
+     - Add some documentation to the runner script.
+
 0.01  Mon, 05 Apr 2010 04:59:17 -0000 (Jacob Helwig <jhelwig@cpan.org>)
      - Initial commit.
      - Start collection object for posts & authors.

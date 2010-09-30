@@ -4,6 +4,17 @@ global:
 releases:
   - author: 'Jacob Helwig <jhelwig@cpan.org>'
     changes:
+      - 'Update tag pages to be tag/index.html, instead of tag.html'
+      - Update to use the latest beta version of Test::Mini.
+      - Fix typo in POD
+      - Ditch Dist::Zilla in favor of Module::Install and ShipIt
+      - Add author only test for checking spelling in POD.
+      - Add some documentation to the runner script.
+    date: 2010-09-30T03:17:57Z
+    tags: []
+    version: 0.02
+  - author: 'Jacob Helwig <jhelwig@cpan.org>'
+    changes:
       - Initial commit.
       - Start collection object for posts & authors.
       - Add ability to populate Compendium posts and authors from a directory.

@@ -1,6 +1,15 @@
+# NAME
+
+WWW::StaticBlog - Generate a set of static pages for a blog.
+
+# VERSION
+
+0.02
+
 # INSTALLATION
 
 To install this module, run the following commands:
+
     perl Makefile.PL
     make
     make test
@@ -10,7 +19,7 @@ To install this module, run the following commands:
 
 # SYNOPSIS
 
-# TODO - Write the documentation.
+Generate a set of static pages for a blog.
 
 # AUTHOR
 

@@ -2,6 +2,7 @@ bin/www-staticblog
 ChangeLog
 Changes
 inc/Module/Install.pm
+inc/Module/Install/AuthorRequires.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
@@ -27,6 +28,7 @@ Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
+README
 README.mkdn
 t/lib/Test/WWW/StaticBlog/Author.t
 t/lib/Test/WWW/StaticBlog/Compendium.t

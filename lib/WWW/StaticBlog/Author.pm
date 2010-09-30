@@ -2,7 +2,7 @@ use MooseX::Declare;
 
 class WWW::StaticBlog::Author
 {
-    our $VERSION = '0.001';
+    our $VERSION = '0.02';
 
     use Config::JFDI ();
 
@@ -78,6 +78,10 @@ __END__
 
 WWW::StaticBlog::Author - An Author of a Post.
 
+=head1 VERSION
+
+0.02
+
 =head1 SYNOPSIS
 
 An Author of a Post.
@@ -85,7 +89,6 @@ An Author of a Post.
 =head1 AUTHOR
 
 Jacob Helwig, C<< <jhelwig at cpan.org> >>
-
 
 =head1 BUGS
 

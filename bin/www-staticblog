@@ -5,6 +5,8 @@ use warnings;
 
 use WWW::StaticBlog::Site;
 
+our $VERSION = 0.02;
+
 my $site = WWW::StaticBlog::Site->new_with_options();
 $site->run();
 
@@ -13,6 +15,10 @@ __END__
 =head1 NAME
 
 www-staticblog - Generate a static site using WWW::StaticBlog
+
+=head1 VERSION
+
+0.02
 
 =head1 SYNOPSIS
 

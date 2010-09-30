@@ -1,6 +1,6 @@
 package WWW::StaticBlog::Compendium;
 
-our $VERSION = '0.001';
+our $VERSION = '0.02';
 
 use 5.010;
 use Moose;
@@ -161,10 +161,14 @@ method _filter_posts_to_tag($tag, @posts)
 
 "I don't think there's a punch-line scheduled, is there?";
 __END__
+
 =head1 NAME
 
 WWW::StaticBlog::Compendium - Collection of all Authors, and Posts for a blog.
 
+=head1 VERSION
+
+0.02
 
 =head1 SYNOPSIS
 
@@ -173,7 +177,6 @@ Collection of all Authors, and Posts for a blog.
 =head1 AUTHOR
 
 Jacob Helwig, C<< <jhelwig at cpan.org> >>
-
 
 =head1 BUGS
 
