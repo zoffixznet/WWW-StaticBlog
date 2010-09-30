@@ -112,8 +112,8 @@ the templates.
 
 =item --url <url>
 
-Base URL of the site being generated. (Must be provided when C<--post_feed> is
-given.)
+Base URL of the site being generated, including the trailing slash (Ex: L<http://technosorcery.net/>).  Must be provided when C<--post_feed> is
+given.
 
 =item --configfile <file>
 
