@@ -56,6 +56,8 @@ test_requires 'Text::Outdent';
 author_requires 'Test::More';
 author_requires 'Test::Spelling';
 
+install_script 'www-staticblog';
+
 auto_provides_class;
 
 WriteAll;
