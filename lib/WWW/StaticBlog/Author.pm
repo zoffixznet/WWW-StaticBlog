@@ -73,14 +73,14 @@ class WWW::StaticBlog::Author
 #"Dinsdale, He was a nice boy...... He nailed my head to a coffee table.";
 #"1943, an ewok makes it behind German lines.";
 __END__
+
 =head1 NAME
 
-WWW::StaticBlog::Author - Generate a set of static pages for a blog.
-
+WWW::StaticBlog::Author - An Author of a Post.
 
 =head1 SYNOPSIS
 
-# TODO - Write the documentation.
+An Author of a Post.
 
 =head1 AUTHOR
 

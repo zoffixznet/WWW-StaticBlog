@@ -53,6 +53,9 @@ test_requires 'Test::TempDir';
 test_requires 'Text::Lorem';
 test_requires 'Text::Outdent';
 
+author_requires 'Test::More';
+author_requires 'Test::Spelling';
+
 auto_provides_class;
 
 WriteAll;

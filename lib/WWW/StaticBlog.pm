@@ -28,7 +28,7 @@ To install this module, run the following commands:
 
 =head1 SYNOPSIS
 
-# TODO - Write the documentation.
+Generate a set of static pages for a blog.
 
 =head1 AUTHOR
 

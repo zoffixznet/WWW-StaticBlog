@@ -11,3 +11,4 @@ pm_to_lib
 WWW-PivotalTracker-.*
 \.shipit$
 t/tmp/*
+t/pod_spell.t

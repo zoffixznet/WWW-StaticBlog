@@ -277,11 +277,11 @@ class WWW::StaticBlog::Post
 __END__
 =head1 NAME
 
-WWW::StaticBlog::Post - Generate a set of static pages for a blog.
+WWW::StaticBlog::Post - A Post itself.
 
 =head1 SYNOPSIS
 
-# TODO - Write the documentation.
+A Post itself.
 
 =head1 AUTHOR
 

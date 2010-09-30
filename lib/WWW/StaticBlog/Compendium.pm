@@ -168,7 +168,7 @@ WWW::StaticBlog::Compendium - Collection of all Authors, and Posts for a blog.
 
 =head1 SYNOPSIS
 
-# TODO - Write the documentation.
+Collection of all Authors, and Posts for a blog.
 
 =head1 AUTHOR
 
