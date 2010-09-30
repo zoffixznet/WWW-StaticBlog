@@ -1,0 +1,6 @@
+steps = ApplyYAMLChangeLogVersion, ChangePodVersion, CheckChangeLog, Readme, CheckVersionsMatch, Manifest, DistTest, Commit, Tag, MakeDist, UploadCPAN, DistClean
+
+git.tagpattern = v%v
+git.sign_tag = 1
+
+CheckChangeLog.files = ChangeLog
