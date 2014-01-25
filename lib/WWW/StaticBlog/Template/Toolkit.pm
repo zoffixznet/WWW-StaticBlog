@@ -1,5 +1,5 @@
+use Class::Load;
 use MooseX::Declare;
-
 class WWW::StaticBlog::Template::Toolkit
 {
     our $VERSION = '0.02';
@@ -32,7 +32,7 @@ class WWW::StaticBlog::Template::Toolkit
 
     method _build_template_engine()
     {
-        Class::MOP::load_class($self->template_class());
+        Class::Load::load_class($self->template_class());
 
         return $self->template_class()->new(
             $self->options()

@@ -11,7 +11,7 @@ homepage   'http://github.com/jhelwig/WWW-StaticBlog',
 readme_markdown_from 'lib/WWW/StaticBlog.pm';
 
 requires 'aliased';
-requires 'Class::MOP';
+requires 'Class::Load' => 0.20;
 requires 'Config::JFDI';
 requires 'Cwd';
 requires 'Data::Dumper';

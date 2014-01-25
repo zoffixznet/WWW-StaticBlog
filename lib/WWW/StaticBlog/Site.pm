@@ -1,7 +1,7 @@
 use 5.010;
 
+use Class::Load;
 use MooseX::Declare;
-
 class WWW::StaticBlog::Site
     with WWW::StaticBlog::Role::FileLoader
     with MooseX::SimpleConfig
@@ -221,7 +221,7 @@ class WWW::StaticBlog::Site
         my $template_class = $self->template_class();
         $template_class =~ s/^::/WWW::StaticBlog::/;
 
-        Class::MOP::load_class($template_class);
+        Class::Load::load_class($template_class);
 
         $template_class->new(
             options  => $self->template_options(),

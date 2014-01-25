@@ -4,8 +4,6 @@ role WWW::StaticBlog::Role::Template
 {
     our $VERSION = '0.02';
 
-    use Class::MOP;
-
     has template_class => (
         is       => 'ro',
         isa      => 'Str',
